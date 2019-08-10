@@ -16,7 +16,7 @@ gcloud compute networks subnets create kubernetes \
   
   gcloud compute firewall-rules list --filter="network:kubernetes-the-hard-way"
   
-  gcloud compute addresses create kubernetes-the-hard-way \
+gcloud compute addresses create kubernetes-the-hard-way \
   --region $(gcloud config get-value compute/region)
   
   gcloud compute addresses list --filter="name=('kubernetes-the-hard-way')"
