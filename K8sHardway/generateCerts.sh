@@ -82,8 +82,8 @@ cfssl gencert \
 # Input --. worker-0-csr.json, CN=system:node:worker-0, O=system:node, -hostname=worker-0,<internalIP>,<externalIP>
 # Output --> worker-0.pem, worker-0-key.pem
 
-
-for instance in worker-0 worker-1 worker-2; do
+#for instance in worker-0 worker-1 worker-2; do
+for instance in worker-0; do
 cat > ${instance}-csr.json <<EOF
 {
   "CN": "system:node:${instance}",
