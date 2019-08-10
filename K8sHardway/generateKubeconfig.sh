@@ -1,4 +1,12 @@
 
+# IMPT:
+# Server is set to LB IP:6443 for worker and Proxy
+# Set to 127.0.0.1 for controller manager, scheduler, admin
+
+# Admin config is used by kubectl installed on the API/control plane server.. hence server IP set to 127.0.0.1
+# this admin kube config cannot be used as is for connecting t API server remotely..
+# Hence new config is needed for remote access to API server.
+
 KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
   --region $(gcloud config get-value compute/region) \
   --format 'value(address)')
