@@ -42,8 +42,8 @@ cfssl gencert -initca ca-csr.json | cfssljson -bare ca
 }
 
 
-# Admin client cert
-# Input --. admin-csr.json, CN=admin, O=systems:masters
+# Admin client cert - used by kubelet for authenticating with API server
+# Input --. admin-csr.json, CN=admin, O=system:masters
 # Output --> admin.pem, admin-key.pem
 
 
@@ -188,3 +188,126 @@ cfssl gencert \
   kube-proxy-csr.json | cfssljson -bare kube-proxy
 
 }
+
+
+
+# Kube schedular client cert 
+# Input --. kube-scheduler-csr.json, CN=system:kube-scheduler O=system:kube-scheduler
+# Output --> kube-scheduler.pem, kube-scheduler-key.pem
+
+
+
+{
+
+cat > kube-scheduler-csr.json <<EOF
+{
+  "CN": "system:kube-scheduler",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "system:kube-scheduler",
+      "OU": "Kubernetes The Hard Way",
+      "ST": "Oregon"
+    }
+  ]
+}
+EOF
+
+cfssl gencert \
+  -ca=ca.pem \
+  -ca-key=ca-key.pem \
+  -config=ca-config.json \
+  -profile=kubernetes \
+  kube-scheduler-csr.json | cfssljson -bare kube-scheduler
+
+}
+
+
+# Kubernetes API SERVER cert -- Hostname added to cert..
+# Input --. kubernetes-csr.json, CN=kubernetes, O=kubernetes, -hostname=<DNS IP>, 127.0.0.1,kubernetes.local,<All internalIPs>,<LB IP>
+# Output --> kubernetes.pem, kubernetes-key.pem
+
+KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
+  --region $(gcloud config get-value compute/region) \
+  --format 'value(address)')
+
+cat > kubernetes-csr.json <<EOF
+{
+  "CN": "kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "Kubernetes",
+      "OU": "Kubernetes The Hard Way",
+      "ST": "Oregon"
+    }
+  ]
+}
+EOF
+
+cfssl gencert \
+  -ca=ca.pem \
+  -ca-key=ca-key.pem \
+  -config=ca-config.json \
+  -hostname=10.32.0.1,10.240.0.10,10.240.0.11,10.240.0.12,${KUBERNETES_PUBLIC_ADDRESS},127.0.0.1,kubernetes.default \
+  -profile=kubernetes \
+  kubernetes-csr.json | cfssljson -bare kubernetes
+
+}
+
+
+
+# Server Account key pair - used by controller manager for generating and signing tokens...
+# Input --. service-account-csr.json, CN=service-accounts, O=kubernetes, 
+# Output --> service-account.pem, service-account.pem
+
+{
+
+cat > service-account-csr.json <<EOF
+{
+  "CN": "service-accounts",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "Kubernetes",
+      "OU": "Kubernetes The Hard Way",
+      "ST": "Oregon"
+    }
+  ]
+}
+EOF
+
+cfssl gencert \
+  -ca=ca.pem \
+  -ca-key=ca-key.pem \
+  -config=ca-config.json \
+  -profile=kubernetes \
+  service-account-csr.json | cfssljson -bare service-account
+
+}
+
+#for instance in worker-0 worker-1 worker-2; do
+for instance in worker-0; do
+  gcloud compute scp ca.pem ${instance}-key.pem ${instance}.pem ${instance}:~/
+done
+
+#for instance in controller-0 controller-1 controller-2; do
+for instance in controller-0; do
+  gcloud compute scp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
+    service-account-key.pem service-account.pem ${instance}:~/
+done
