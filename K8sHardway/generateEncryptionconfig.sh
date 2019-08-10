@@ -1,3 +1,4 @@
+# data saved in ETCD DB is always encrypted using this key..
 
 ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
 
