@@ -197,6 +197,7 @@ EOF
   sudo systemctl start containerd kubelet kube-proxy
 }
 
+# Run this command from the gcloud utility
 gcloud compute ssh controller-0 \
   --command "kubectl get nodes --kubeconfig admin.kubeconfig"
   
