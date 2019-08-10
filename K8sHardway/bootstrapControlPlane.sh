@@ -201,8 +201,26 @@ rules:
       - "*"
 EOF
 
-# Crete a network loadbalancer..
 
+cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: system:kube-apiserver
+  namespace: ""
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:kube-apiserver-to-kubelet
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: kubernetes
+EOF
+
+
+# Crete a network loadbalancer..
+#  Run this command from the gcloud client
 {
   KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
     --region $(gcloud config get-value compute/region) \
@@ -230,22 +248,6 @@ EOF
     --region $(gcloud config get-value compute/region) \
     --target-pool kubernetes-target-pool
 }
-
-cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: system:kube-apiserver
-  namespace: ""
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: system:kube-apiserver-to-kubelet
-subjects:
-  - apiGroup: rbac.authorization.k8s.io
-    kind: User
-    name: kubernetes
-EOF
 
 
 # Final Verification
