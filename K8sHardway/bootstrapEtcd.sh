@@ -1,3 +1,20 @@
+# At this point controller has below files in user home directory
+#-rw-r--r-- 1 imsrv01 imsrv01     1367 Aug 10 21:14 ca.pem
+#-rw------- 1 imsrv01 imsrv01     1679 Aug 10 21:14 ca-key.pem
+#-rw------- 1 imsrv01 imsrv01     1675 Aug 10 21:14 kubernetes-key.pem
+#-rw-r--r-- 1 imsrv01 imsrv01     1521 Aug 10 21:14 kubernetes.pem
+#-rw------- 1 imsrv01 imsrv01     1679 Aug 10 21:14 service-account-key.pem
+#-rw-r--r-- 1 imsrv01 imsrv01     1440 Aug 10 21:14 service-account.pem
+#-rw------- 1 imsrv01 imsrv01     6329 Aug 10 21:24 admin.kubeconfig
+#-rw------- 1 imsrv01 imsrv01     6455 Aug 10 21:24 kube-controller-manager.kubeconfig
+#-rw------- 1 imsrv01 imsrv01     6405 Aug 10 21:24 kube-scheduler.kubeconfig
+#-rw-r--r-- 1 imsrv01 imsrv01      240 Aug 10 21:27 encryption-config.yaml
+
+# Only API server talks to ETCD DB
+# API server cert and key - kubernetes-key.pem kubernetes.pem is used for setting up ETCD .
+# files are copid to dir - /etc/etcd/
+
+
 gcloud compute ssh controller-0
 
 wget -q --show-progress --https-only --timestamping \
