@@ -12,7 +12,10 @@
 
 # Only API server talks to ETCD DB
 # API server cert and key - kubernetes-key.pem kubernetes.pem is used for setting up ETCD .
-# files are copid to dir - /etc/etcd/
+# files are copid to dir - /etc/etcd/ + ca.pem
+
+# ETCD peer port - 2380
+# client port - 2379
 
 
 gcloud compute ssh controller-0
@@ -56,7 +59,8 @@ ExecStart=/usr/local/bin/etcd \\
   --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
   --advertise-client-urls https://${INTERNAL_IP}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster controller-0=https://10.240.0.10:2380,controller-1=https://10.240.0.11:2380,controller-2=https://10.240.0.12:2380 \\
+  # --initial-cluster controller-0=https://10.240.0.10:2380,controller-1=https://10.240.0.11:2380,controller-2=https://10.240.0.12:2380 \\
+  --initial-cluster controller-0=https://10.240.0.10:2380 \\
   --initial-cluster-state new \\
   --data-dir=/var/lib/etcd
 Restart=on-failure
