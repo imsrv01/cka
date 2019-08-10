@@ -1,4 +1,6 @@
 # data saved in ETCD DB is always encrypted using this key..
+# this yaml is passed as a param while starting the API server..
+#  --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
 
 ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
 
