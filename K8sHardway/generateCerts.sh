@@ -78,8 +78,8 @@ cfssl gencert \
 }
 
 
-# Worker client cert
-# Input --. worker-0-csr.json, CN=system:node:worker-0, O=systems:node, -hostname=worker-0,<internalIP>,<externalIP>
+# Worker client cert -- worker works as server (API server --> Node) and hence hostname is added to cert for validation by clients...
+# Input --. worker-0-csr.json, CN=system:node:worker-0, O=system:node, -hostname=worker-0,<internalIP>,<externalIP>
 # Output --> worker-0.pem, worker-0-key.pem
 
 
@@ -117,3 +117,74 @@ cfssl gencert \
   -profile=kubernetes \
   ${instance}-csr.json | cfssljson -bare ${instance}
 done
+
+
+# Kube controller manager client cert 
+# Input --. kube-controller-manager-csr.json, CN=system:kube-controller-manager, O=system:kube-controller-manager
+# Output --> kube-controller-manager.pem, kube-controller-manager-key.pem
+
+{
+
+cat > kube-controller-manager-csr.json <<EOF
+{
+  "CN": "system:kube-controller-manager",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "system:kube-controller-manager",
+      "OU": "Kubernetes The Hard Way",
+      "ST": "Oregon"
+    }
+  ]
+}
+EOF
+
+cfssl gencert \
+  -ca=ca.pem \
+  -ca-key=ca-key.pem \
+  -config=ca-config.json \
+  -profile=kubernetes \
+  kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
+
+}
+
+
+# Kube proxy client cert 
+# Input --. kube-proxy-csr.json, CN=system:kube-proxy, O=system:node-proxier
+# Output --> kube-proxy.pem, kube-proxy-key.pem
+
+
+{
+
+cat > kube-proxy-csr.json <<EOF
+{
+  "CN": "system:kube-proxy",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "system:node-proxier",
+      "OU": "Kubernetes The Hard Way",
+      "ST": "Oregon"
+    }
+  ]
+}
+EOF
+
+cfssl gencert \
+  -ca=ca.pem \
+  -ca-key=ca-key.pem \
+  -config=ca-config.json \
+  -profile=kubernetes \
+  kube-proxy-csr.json | cfssljson -bare kube-proxy
+
+}
