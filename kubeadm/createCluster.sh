@@ -67,6 +67,7 @@ deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
+#sudo apt-get install -y kubelet=1.13.5-00 kubeadm=1.13.5-00 kubectl=1.13.5-00
 sudo apt-mark hold kubelet kubeadm kubectl
 
 kubeadm init --pod-network-cidr=10.244.0.0/16
