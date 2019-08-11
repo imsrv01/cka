@@ -80,3 +80,27 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846
 
 kubectl get nodes
 
+
+for i in 0; do
+  gcloud compute instances create worker-${i} \
+    --async \
+    --boot-disk-size 200GB \
+    --can-ip-forward \
+    --image-family ubuntu-1804-lts \
+    --image-project ubuntu-os-cloud \
+    --machine-type n1-standard-1 \
+    --private-network-ip 10.240.0.3${i} \
+    --scopes compute-rw,storage-ro,service-management,service-control,logging-write,monitoring \
+    --subnet kubeadm \
+    --tags kubeadm,worker
+done
+
+# Run above command on this worker..
+kubeadm token create
+
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | \
+   openssl dgst -sha256 -hex | sed 's/^.* //'
+   
+# Run join command...
+
+sudo kubeadm join 10.240.0.20:6443 --token rv0cuh.4nomfo8e1k4f9cc2 --discovery-token-ca-cert-hash sha256:b485631c3ff2f82350c761814a2d3d94b80677ccaa7ce17baed7df4dbbb396dd
