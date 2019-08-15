@@ -11,7 +11,7 @@ gcloud compute networks subnets create kubeadm \
 gcloud compute firewall-rules create kubeadm-allow-internal \
   --allow tcp,udp,icmp \
   --network kubeadm \
-  --source-ranges 10.240.0.0/24,10.244.0.0/16
+  --source-ranges 10.240.0.0/24,10.244.0.0/16,192.168.0.0/16
 
 gcloud compute firewall-rules create kubeadm-allow-external \
   --allow tcp:22,tcp:6443,icmp \
@@ -37,7 +37,7 @@ done
 gcloud compute ssh master-0
 
 sudo apt-get update
-sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository \
   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
@@ -70,14 +70,16 @@ sudo apt-get install -y kubelet kubeadm kubectl
 #sudo apt-get install -y kubelet=1.13.5-00 kubeadm=1.13.5-00 kubectl=1.13.5-00
 sudo apt-mark hold kubelet kubeadm kubectl
 
-kubeadm init --pod-network-cidr=10.244.0.0/16
-
+#kubeadm init --pod-network-cidr=10.244.0.0/16
+#sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 sudo sysctl net.bridge.bridge-nf-call-iptables=1
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
+#kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
+kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
 
 kubectl get nodes
 
