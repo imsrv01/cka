@@ -139,6 +139,11 @@ EOF
 
 
 # Heathcheck - from http to https using nginx
+# The network load balancer only supports HTTP health checks which means the HTTPS endpoint exposed by the API server cannot be used. 
+# As a workaround the nginx webserver can be used to proxy HTTP health checks. 
+# nginx will be installed and configured to accept HTTP health checks on port 80 and proxy the connections 
+# to the API server on https://127.0.0.1:6443/healthz
+sudo apt-get update
 sudo apt-get install -y nginx
 
 cat > kubernetes.default.svc.cluster.local <<EOF
