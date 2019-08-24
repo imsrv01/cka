@@ -231,6 +231,9 @@ cfssl gencert \
 # Kubernetes API SERVER cert -- Hostname added to cert..
 # Input --. kubernetes-csr.json, CN=kubernetes, O=kubernetes, -hostname=<DNS IP>, 127.0.0.1,kubernetes.local,<All internalIPs>,<LB IP>
 # Output --> kubernetes.pem, kubernetes-key.pem
+# IMPT : adding 127.0.0.1 to cert allows to query the API server using 127.0.0.1 IP as hostname...
+# Since localhost is not present, then API server cannot be queried using localhost as hostname... 
+# Error - error "remote error: tls: bad certificate", ServerName "localhost"
 
 KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
   --region $(gcloud config get-value compute/region) \
